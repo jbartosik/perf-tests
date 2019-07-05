@@ -1,0 +1,11 @@
+apiVersion: autoscaling.k8s.io/v1beta2
+kind: VerticalPodAutoscaler
+metadata:
+  name: {{.Name}}
+spec:
+  targetRef:
+    apiVersion: "v1"
+    kind:       ReplicationController
+    name:       {{.Name}}
+  updatePolicy:
+    updateMode: "Auto"

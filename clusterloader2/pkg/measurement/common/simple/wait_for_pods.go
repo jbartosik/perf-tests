@@ -18,6 +18,7 @@ package simple
 
 import (
 	"fmt"
+	"k8s.io/klog"
 	"strings"
 	"time"
 
@@ -25,7 +26,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/sets"
 	clientset "k8s.io/client-go/kubernetes"
-	"k8s.io/klog"
 	"k8s.io/perf-tests/clusterloader2/pkg/measurement"
 	measurementutil "k8s.io/perf-tests/clusterloader2/pkg/measurement/util"
 	"k8s.io/perf-tests/clusterloader2/pkg/util"
@@ -109,6 +109,7 @@ func waitForPods(clientSet clientset.Interface, namespace, labelSelector, fieldS
 	for {
 		select {
 		case <-stopCh:
+			klog.Info("Stop waitForPods")
 			return fmt.Errorf("timeout while waiting for %d pods to be running in namespace '%v' with labels '%v' and fields '%v' - only %d found running", desiredPodCount, namespace, labelSelector, fieldSelector, podsStatus.Running)
 		case <-time.After(defaultWaitForPodsInterval):
 			pods := ps.List()
@@ -141,6 +142,9 @@ func waitForPods(clientSet clientset.Interface, namespace, labelSelector, fieldS
 			// We allow inactive pods (e.g. eviction happened).
 			// We wait until there is a desired number of pods running and all other pods are inactive.
 			if len(pods) == (podsStatus.Running+podsStatus.Inactive) && podsStatus.Running == desiredPodCount {
+				klog.Infof(
+					"There are %d pods, %d of them running and %d inactive. number of running pods is equal to desired runing pod count of %d.",
+					len(pods), podsStatus.Running, podsStatus.Inactive, desiredPodCount)
 				return nil
 			}
 			oldPods = pods

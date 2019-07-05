@@ -81,7 +81,9 @@ func (ste *simpleTestExecutor) ExecuteTest(ctx Context, conf *api.Config) *error
 			continue
 		}
 		if ctx.GetClusterLoaderConfig().ReportDir == "" {
-			klog.Infof("%v: %v", summary.SummaryName(), summary.SummaryContent())
+			if summary.SummaryName() != "kube-apiserver_CPUProfile" && summary.SummaryName() != "kube-apiserver_MemoryProfile" {
+				klog.Infof("%v: %v", summary.SummaryName(), summary.SummaryContent())
+			}
 		} else {
 			// TODO(krzysied): Remember to keep original filename style for backward compatibility.
 			filePath := path.Join(ctx.GetClusterLoaderConfig().ReportDir, summary.SummaryName()+"_"+conf.Name+"_"+summary.SummaryTime().Format(time.RFC3339)+"."+summary.SummaryExt())
